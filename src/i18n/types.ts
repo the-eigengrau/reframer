@@ -61,6 +61,14 @@ export interface Translations {
     resetAllData: string;
     resetConfirm: string;
     dataCleared: string;
+    zeroRetention: string;
+    zeroRetentionStatus: { on: string; off: string };
+    zeroRetentionBlurb: string;
+    skipAI: string;
+    skipAIStatus: { on: string; off: string };
+    eraseHistory: string;
+    eraseHistoryConfirm: string;
+    eraseHistoryDone: string;
   };
 
   entries: {

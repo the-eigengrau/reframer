@@ -23,11 +23,11 @@ export function createProvider(config: AppConfig): AIProvider | null {
   }
 }
 
-export async function runAISession(config: AppConfig, entry: REBTEntry): Promise<void> {
+export async function runAISession(config: AppConfig, entry: REBTEntry, persist = true): Promise<void> {
   const provider = createProvider(config);
   if (!provider) return;
 
-  await runConversation(provider, entry);
+  await runConversation(provider, entry, persist);
 }
 
 export async function generateFarewell(config: AppConfig, entry: REBTEntry): Promise<string | null> {

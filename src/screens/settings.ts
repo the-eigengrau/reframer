@@ -1,7 +1,7 @@
 import { select, input, password, confirm } from '@inquirer/prompts';
 import boxen from 'boxen';
 import { saveConfig, clearCachedKey, type Config } from '../config/index.js';
-import { getMemories, deleteMemory, deleteAllMemories, setEncryptionKey } from '../storage/index.js';
+import { getMemories, deleteMemory, deleteAllMemories, setEncryptionKey, eraseHistory } from '../storage/index.js';
 import { getDb } from '../storage/database.js';
 import { generateSalt, deriveKey, createSentinel } from '../storage/encryption.js';
 import { cacheKey } from '../config/index.js';
@@ -29,7 +29,10 @@ export async function settingsMenu(config: Config): Promise<Config> {
           { value: 'audio', name: `${t().settings.audio}  ${colors.dim(config.preferences.audioEnabled ? t().settings.audioStatus.on : t().settings.audioStatus.off)}` },
           { value: 'ai', name: `${t().settings.aiProvider}  ${colors.dim(config.ai.provider)}` },
           { value: 'encryption', name: `${t().settings.encryption}  ${colors.dim(t().settings.encryptionStatus[config.encryption.mode])}` },
+          { value: 'zeroRetention', name: `${t().settings.zeroRetention}  ${colors.dim(config.preferences.zeroRetention ? t().settings.zeroRetentionStatus.on : t().settings.zeroRetentionStatus.off)}` },
+          { value: 'skipAI', name: `${t().settings.skipAI}  ${colors.dim(config.preferences.skipAI ? t().settings.skipAIStatus.on : t().settings.skipAIStatus.off)}` },
           { value: 'memories', name: t().settings.memories },
+          { value: 'eraseHistory', name: colors.dim(t().settings.eraseHistory) },
           { value: 'reset', name: colors.dim(t().settings.resetAllData) },
           { value: 'help', name: colors.dim('? Help') },
         ],
@@ -54,8 +57,17 @@ export async function settingsMenu(config: Config): Promise<Config> {
       case 'encryption':
         config = await configureEncryption(config);
         break;
+      case 'zeroRetention':
+        config = await configureZeroRetention(config);
+        break;
+      case 'skipAI':
+        config = await configureSkipAI(config);
+        break;
       case 'memories':
         await manageMemories();
+        break;
+      case 'eraseHistory':
+        await eraseHistoryAction();
         break;
       case 'reset':
         await resetAllData();
@@ -304,6 +316,66 @@ async function configureAudio(config: Config): Promise<Config> {
   return config;
 }
 
+async function configureZeroRetention(config: Config): Promise<Config> {
+  console.clear();
+  console.log();
+
+  console.log(boxen(colors.dim(t().settings.zeroRetentionBlurb), {
+    padding: { top: 0, bottom: 0, left: 1, right: 1 },
+    borderColor: BOX_COLOR,
+    borderStyle: 'round',
+    dimBorder: true,
+  }));
+
+  const enabled = await select<boolean>({
+    message: '',
+    theme: { ...promptTheme, prefix: { idle: '', done: '' } },
+    choices: [
+      { value: false, name: t().settings.zeroRetentionStatus.off },
+      { value: true, name: t().settings.zeroRetentionStatus.on },
+    ],
+    default: config.preferences.zeroRetention,
+  });
+
+  config.preferences.zeroRetention = enabled;
+  saveConfig(config);
+  console.log(colors.dim(`  ${t().common.updated}`));
+  return config;
+}
+
+async function configureSkipAI(config: Config): Promise<Config> {
+  console.clear();
+  console.log();
+
+  const enabled = await select<boolean>({
+    message: '',
+    theme: { ...promptTheme, prefix: { idle: '', done: '' } },
+    choices: [
+      { value: false, name: t().settings.skipAIStatus.off },
+      { value: true, name: t().settings.skipAIStatus.on },
+    ],
+    default: config.preferences.skipAI,
+  });
+
+  config.preferences.skipAI = enabled;
+  saveConfig(config);
+  console.log(colors.dim(`  ${t().common.updated}`));
+  return config;
+}
+
+async function eraseHistoryAction(): Promise<void> {
+  const sure = await confirm({
+    message: t().settings.eraseHistoryConfirm,
+    theme: promptTheme,
+    default: false,
+  });
+
+  if (!sure) return;
+
+  eraseHistory();
+  console.log(colors.dim(`  ${t().settings.eraseHistoryDone}`));
+}
+
 async function resetAllData(): Promise<void> {
   const sure = await confirm({
     message: t().settings.resetConfirm,
@@ -317,5 +389,6 @@ async function resetAllData(): Promise<void> {
   db.exec('DELETE FROM entries');
   db.exec('DELETE FROM conversations');
   db.exec('DELETE FROM memories');
+  db.exec('DELETE FROM activity');
   console.log(colors.dim(`  ${t().settings.dataCleared}`));
 }

@@ -10,7 +10,7 @@ import {
   promptMotivation,
 } from './prompts.js';
 import type { REBTEntry } from './types.js';
-import { generateId, saveEntry } from '../storage/index.js';
+import { generateId } from '../storage/index.js';
 import { todayKey } from '../utils/date.js';
 
 export async function runQuestionnaire(): Promise<REBTEntry> {
@@ -41,7 +41,7 @@ export async function runQuestionnaire(): Promise<REBTEntry> {
     motivation,
   };
 
-  saveEntry(entry);
-
+  // Persistence is decided by the session layer (runSession), which knows
+  // whether zero-retention mode is enabled.
   return entry;
 }

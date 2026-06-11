@@ -61,6 +61,14 @@ export const la: Translations = {
     resetAllData: 'Omnia data rescinde',
     resetConfirm: 'Omnes commentarios, colloquia, et memorias delere?',
     dataCleared: 'Data purgata.',
+    zeroRetention: 'Modus sine retentione',
+    zeroRetentionStatus: { on: 'activus', off: 'inactivus' },
+    zeroRetentionBlurb: 'Cum activus, sessiones numquam servantur — nulli commentarii, colloquia, vel memoriae in disco scribuntur. Solum series tua numeratur.',
+    skipAI: 'Sessionem IA praeterire',
+    skipAIStatus: { on: 'activus', off: 'inactivus' },
+    eraseHistory: 'Historiam dele',
+    eraseHistoryConfirm: 'Omnes commentarios, colloquia, et memorias delere? Series tua servatur.',
+    eraseHistoryDone: 'Historia deleta. Series servata.',
   },
 
   entries: {

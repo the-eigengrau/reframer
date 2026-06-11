@@ -22,6 +22,8 @@ export const configSchema = z.object({
     language: z.enum(['en', 'la', 'grc']).default('en'),
     audioEnabled: z.boolean().default(true),
     startupMusic: z.enum(['always', 'daily', 'never']).default('always'),
+    zeroRetention: z.boolean().default(false),
+    skipAI: z.boolean().default(false),
   }),
 });
 

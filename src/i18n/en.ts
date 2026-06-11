@@ -61,6 +61,14 @@ export const en: Translations = {
     resetAllData: 'Reset all data',
     resetConfirm: 'Delete all entries, conversations, and memories?',
     dataCleared: 'Data cleared.',
+    zeroRetention: 'Zero-retention mode',
+    zeroRetentionStatus: { on: 'on', off: 'off' },
+    zeroRetentionBlurb: 'When on, sessions are never saved — no entries, conversations, or memories are written to disk. Only your streak keeps counting.',
+    skipAI: 'Skip AI session',
+    skipAIStatus: { on: 'on', off: 'off' },
+    eraseHistory: 'Erase history',
+    eraseHistoryConfirm: 'Erase all entries, conversations, and memories? Your streak is preserved.',
+    eraseHistoryDone: 'History erased. Streak preserved.',
   },
 
   entries: {

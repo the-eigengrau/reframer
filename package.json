@@ -14,6 +14,7 @@
   "scripts": {
     "dev": "NODE_OPTIONS='--disable-warning=DEP0040' tsx src/index.ts",
     "build": "tsc",
+    "prepare": "npm run build",
     "prepublishOnly": "npm run build",
     "generate-audio": "tsx scripts/generate-audio.ts",
     "test": "vitest run",

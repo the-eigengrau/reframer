@@ -89,6 +89,32 @@ export function saveEntry(entry: REBTEntry): void {
   );
 }
 
+// Record a content-free date marker for the streak, without persisting any
+// journal content. Used by zero-retention sessions in place of saveEntry().
+export function recordActivity(entry: Pick<REBTEntry, 'id' | 'createdAt' | 'dateKey'>): void {
+  const db = getDb();
+  db.prepare(`
+    INSERT OR IGNORE INTO activity (id, created_at, date_key)
+    VALUES (?, ?, ?)
+  `).run(entry.id, entry.createdAt, entry.dateKey);
+}
+
+// Erase all journal content while preserving the streak: copy each entry's
+// date marker into the activity table, then drop the content tables.
+export function eraseHistory(): void {
+  const db = getDb();
+  const tx = db.transaction(() => {
+    db.exec(`
+      INSERT OR IGNORE INTO activity (id, created_at, date_key)
+        SELECT id, created_at, date_key FROM entries;
+    `);
+    db.exec('DELETE FROM entries');
+    db.exec('DELETE FROM conversations');
+    db.exec('DELETE FROM memories');
+  });
+  tx();
+}
+
 export function getEntry(id: string): REBTEntry | null {
   const db = getDb();
   const row = db.prepare('SELECT * FROM entries WHERE id = ?').get(id) as EncryptedEntry | undefined;
@@ -213,14 +239,24 @@ function decryptConversationRow(row: EncryptedConversation): Conversation {
 export function getStreakData(): StreakData {
   const db = getDb();
 
-  const totalEntries = (db.prepare('SELECT COUNT(*) as count FROM entries').get() as { count: number }).count;
-  const totalDays = (db.prepare('SELECT COUNT(DISTINCT date_key) as count FROM entries').get() as { count: number }).count;
-  const lastRow = db.prepare('SELECT date_key FROM entries ORDER BY date_key DESC LIMIT 1').get() as { date_key: string } | undefined;
-  const lastEntryDate = lastRow?.date_key || null;
+  // Streak/day counts derive from both retained entries and the content-free
+  // activity markers left by zero-retention sessions / erased history.
+  const totalEntries =
+    (db.prepare('SELECT COUNT(*) as count FROM entries').get() as { count: number }).count +
+    (db.prepare('SELECT COUNT(*) as count FROM activity').get() as { count: number }).count;
 
-  // Get all distinct date_keys sorted descending
-  const dateKeys = (db.prepare('SELECT DISTINCT date_key FROM entries ORDER BY date_key DESC').all() as { date_key: string }[])
+  // Get all distinct date_keys (across both tables) sorted descending
+  const dateKeys = (db.prepare(`
+    SELECT DISTINCT date_key FROM (
+      SELECT date_key FROM entries
+      UNION
+      SELECT date_key FROM activity
+    ) ORDER BY date_key DESC
+  `).all() as { date_key: string }[])
     .map(r => r.date_key);
+
+  const totalDays = dateKeys.length;
+  const lastEntryDate = dateKeys[0] || null;
 
   const { currentStreak, longestStreak } = calculateStreaks(dateKeys);
 

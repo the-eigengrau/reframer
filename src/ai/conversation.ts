@@ -34,6 +34,7 @@ function startThinking(): { stop: () => void } {
 export async function runConversation(
   provider: AIProvider,
   entry: REBTEntry,
+  persist = true,
 ): Promise<void> {
   const memories = loadMemories();
   const recentSummaries = loadRecentSummaries(3, entry.id);
@@ -103,6 +104,9 @@ export async function runConversation(
   }
 
   rl.close();
+
+  // Zero-retention mode keeps the dialogue live but persists nothing.
+  if (!persist) return;
 
   // Save conversation
   const conversation: Conversation = {

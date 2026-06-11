@@ -2,7 +2,7 @@ import { select, password as passwordPrompt } from '@inquirer/prompts';
 import { loadConfig, configExists, readCachedKey, cacheKey, saveConfig, type Config } from './config/index.js';
 import { runSetupWizard } from './config/setup.js';
 import { getDb, closeDb } from './storage/database.js';
-import { setEncryptionKey } from './storage/index.js';
+import { setEncryptionKey, saveEntry, recordActivity } from './storage/index.js';
 import { deriveKey, verifySentinel } from './storage/encryption.js';
 import { animateParthenon } from './ui/ascii-art.js';
 import { displayStatus } from './gamification/index.js';
@@ -158,8 +158,18 @@ async function mainMenuLoop(config: Config): Promise<void> {
 async function runSession(config: Config): Promise<import('./questionnaire/types.js').REBTEntry> {
   const entry = await runQuestionnaire();
 
-  if (config.ai.provider !== 'none') {
-    await runAISession(config, entry);
+  // Zero-retention mode logs only a content-free streak marker; otherwise the
+  // full entry is persisted. The same flag decides whether the AI conversation
+  // and extracted memories are written to disk.
+  const persist = !config.preferences.zeroRetention;
+  if (persist) {
+    saveEntry(entry);
+  } else {
+    recordActivity(entry);
+  }
+
+  if (config.ai.provider !== 'none' && !config.preferences.skipAI) {
+    await runAISession(config, entry, persist);
   }
 
   console.clear();
@@ -210,7 +220,7 @@ async function showFarewell(config: Config, sessionEntry: import('./questionnair
     return;
   }
 
-  if (config.ai.provider !== 'none') {
+  if (config.ai.provider !== 'none' && !config.preferences.skipAI) {
     const spinnerFrames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
     let frame = 0;
     const spinner = setInterval(() => {

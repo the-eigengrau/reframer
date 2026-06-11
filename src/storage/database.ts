@@ -58,10 +58,20 @@ function createTables(db: Database.Database): void {
       auth_tag    TEXT NOT NULL DEFAULT ''
     );
 
+    -- Content-free "I journaled on this day" markers. Used so the streak can
+    -- keep counting under zero-retention mode (and after erasing history)
+    -- without retaining any journal content.
+    CREATE TABLE IF NOT EXISTS activity (
+      id          TEXT PRIMARY KEY,
+      created_at  TEXT NOT NULL,
+      date_key    TEXT NOT NULL
+    );
+
     CREATE INDEX IF NOT EXISTS idx_entries_date_key ON entries(date_key);
     CREATE INDEX IF NOT EXISTS idx_entries_created_at ON entries(created_at);
     CREATE INDEX IF NOT EXISTS idx_memories_category ON memories(category);
     CREATE INDEX IF NOT EXISTS idx_conversations_entry_id ON conversations(entry_id);
+    CREATE INDEX IF NOT EXISTS idx_activity_date_key ON activity(date_key);
   `);
 }
 
