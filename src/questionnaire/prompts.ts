@@ -2,12 +2,16 @@ import { number } from '@inquirer/prompts';
 import { colors } from '../ui/theme.js';
 import { promptTheme } from '../ui/prompt-theme.js';
 import { vimInput } from '../ui/vim-input.js';
-import { wrapText } from '../ui/text.js';
+import { getContentWidth, wrapText } from '../ui/text.js';
 import { t } from '../i18n/index.js';
 
+function printStep(title: string, description: string): void {
+  console.log(colors.white(`\n  ${title}`));
+  console.log(colors.dim(wrapText(description, getContentWidth(2), '  ')));
+}
+
 export async function promptActivatingEvent(): Promise<string> {
-  console.log(colors.white(`\n  ${t().prompts.activatingEvent.title}`));
-  console.log(colors.dim(`  ${t().prompts.activatingEvent.description}`));
+  printStep(t().prompts.activatingEvent.title, t().prompts.activatingEvent.description);
 
   return vimInput({
     validate: (val) => val.trim().length > 0 || t().prompts.activatingEvent.validation,
@@ -16,8 +20,7 @@ export async function promptActivatingEvent(): Promise<string> {
 }
 
 export async function promptEmotionBefore(): Promise<string> {
-  console.log(colors.white(`\n  ${t().prompts.emotionBefore.title}`));
-  console.log(colors.dim(`  ${t().prompts.emotionBefore.description}`));
+  printStep(t().prompts.emotionBefore.title, t().prompts.emotionBefore.description);
 
   return vimInput({
     validate: (val) => val.trim().length > 0 || t().prompts.emotionBefore.validation,
@@ -26,8 +29,7 @@ export async function promptEmotionBefore(): Promise<string> {
 }
 
 export async function promptEmotionIntensity(): Promise<number> {
-  console.log(colors.white(`\n  ${t().prompts.emotionIntensity.title}`));
-  console.log(colors.dim(`  ${t().prompts.emotionIntensity.description}`));
+  printStep(t().prompts.emotionIntensity.title, t().prompts.emotionIntensity.description);
 
   const result = await number({
     message: '',
@@ -40,8 +42,7 @@ export async function promptEmotionIntensity(): Promise<number> {
 }
 
 export async function promptBeliefs(): Promise<string> {
-  console.log(colors.white(`\n  ${t().prompts.beliefs.title}`));
-  console.log(colors.dim(`  ${t().prompts.beliefs.description}`));
+  printStep(t().prompts.beliefs.title, t().prompts.beliefs.description);
 
   return vimInput({
     validate: (val) => val.trim().length > 0 || t().prompts.beliefs.validation,
@@ -50,8 +51,7 @@ export async function promptBeliefs(): Promise<string> {
 }
 
 export async function promptConsequences(): Promise<string> {
-  console.log(colors.white(`\n  ${t().prompts.consequences.title}`));
-  console.log(colors.dim(`  ${t().prompts.consequences.description}`));
+  printStep(t().prompts.consequences.title, t().prompts.consequences.description);
 
   return vimInput({
     validate: (val) => val.trim().length > 0 || t().prompts.consequences.validation,
@@ -61,13 +61,12 @@ export async function promptConsequences(): Promise<string> {
 
 export async function promptDisputation(beliefs: string): Promise<string> {
   // Show beliefs recall block so user can see what they wrote
-  const wrapped = wrapText(beliefs, 68, '  ');
+  const wrapped = wrapText(beliefs, getContentWidth(2, 68), '  ');
   console.log(colors.dim(`\n  ${t().prompts.beliefs.title}`));
   console.log(colors.dim('  ────────────'));
   console.log(colors.dim(wrapped));
 
-  console.log(colors.white(`\n  ${t().prompts.disputation.title}`));
-  console.log(colors.dim(`  ${t().prompts.disputation.description}`));
+  printStep(t().prompts.disputation.title, t().prompts.disputation.description);
 
   return vimInput({
     validate: (val) => val.trim().length > 0 || t().prompts.disputation.validation,
@@ -76,8 +75,7 @@ export async function promptDisputation(beliefs: string): Promise<string> {
 }
 
 export async function promptEffectiveNewPhilosophy(): Promise<string> {
-  console.log(colors.white(`\n  ${t().prompts.newPhilosophy.title}`));
-  console.log(colors.dim(`  ${t().prompts.newPhilosophy.description}`));
+  printStep(t().prompts.newPhilosophy.title, t().prompts.newPhilosophy.description);
 
   return vimInput({
     validate: (val) => val.trim().length > 0 || t().prompts.newPhilosophy.validation,
@@ -86,8 +84,7 @@ export async function promptEffectiveNewPhilosophy(): Promise<string> {
 }
 
 export async function promptEarlyWarningSigns(): Promise<string> {
-  console.log(colors.white(`\n  ${t().prompts.earlyWarningSigns.title}`));
-  console.log(colors.dim(`  ${t().prompts.earlyWarningSigns.description}`));
+  printStep(t().prompts.earlyWarningSigns.title, t().prompts.earlyWarningSigns.description);
 
   return vimInput({
     validate: (val) => val.trim().length > 0 || t().prompts.earlyWarningSigns.validation,
@@ -96,8 +93,7 @@ export async function promptEarlyWarningSigns(): Promise<string> {
 }
 
 export async function promptMotivation(): Promise<string> {
-  console.log(colors.white(`\n  ${t().prompts.motivation.title}`));
-  console.log(colors.dim(`  ${t().prompts.motivation.description}`));
+  printStep(t().prompts.motivation.title, t().prompts.motivation.description);
 
   return vimInput({
     validate: (val) => val.trim().length > 0 || t().prompts.motivation.validation,

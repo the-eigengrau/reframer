@@ -16,6 +16,7 @@ import { promptTheme } from './ui/prompt-theme.js';
 import { animateSessionComplete } from './ui/celebration.js';
 import { getRandomTipRaw } from './ui/tips.js';
 import { showHelp } from './ui/help.js';
+import { getContentWidth, wrapText } from './ui/text.js';
 import { sleep } from './utils/sleep.js';
 import { setLanguage, t } from './i18n/index.js';
 import { initAudio, play, stopAudio, SoundEffect, getStartupMode } from './audio/index.js';
@@ -233,8 +234,7 @@ async function showFarewell(config: Config, sessionEntry: import('./questionnair
     process.stdout.write('\r\x1b[2K');
 
     if (farewell) {
-      process.stdout.write('  ');
-      await typewriter(farewell, config.preferences.animationsEnabled);
+      await typewriter(wrapText(farewell, getContentWidth(2, 72), '  '), config.preferences.animationsEnabled);
       process.stdout.write('\n\n');
       return;
     }
@@ -242,7 +242,6 @@ async function showFarewell(config: Config, sessionEntry: import('./questionnair
 
   // Fallback: REBT tip (no-repeat rotation)
   const tip = getRandomTipRaw();
-  process.stdout.write('  ');
-  await typewriter(tip, config.preferences.animationsEnabled);
+  await typewriter(wrapText(tip, getContentWidth(2, 72), '  '), config.preferences.animationsEnabled);
   process.stdout.write('\n\n');
 }

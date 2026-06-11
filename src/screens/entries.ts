@@ -4,6 +4,7 @@ import { listEntries, getConversation } from '../storage/index.js';
 import { colors, headerStyle, BOX_COLOR } from '../ui/theme.js';
 import { promptTheme } from '../ui/prompt-theme.js';
 import { showHelp } from '../ui/help.js';
+import { getContentWidth, wrapText } from '../ui/text.js';
 import { formatDate } from '../utils/date.js';
 import type { REBTEntry } from '../questionnaire/types.js';
 import { t } from '../i18n/index.js';
@@ -47,7 +48,8 @@ export async function viewPastEntries(): Promise<void> {
         console.log(colors.white(`\n  ${t().entries.conversation}\n`));
         for (const msg of convo.messages) {
           const label = msg.role === 'user' ? colors.white(t().entries.you) : colors.primary(t().entries.rationalizer);
-          console.log(`  ${label}  ${colors.white(msg.content)}`);
+          console.log(`  ${label}`);
+          console.log(colors.white(wrapText(msg.content, getContentWidth(2, 72), '  ')));
           console.log();
         }
       }
@@ -62,31 +64,35 @@ export async function viewPastEntries(): Promise<void> {
 }
 
 function displayEntry(entry: REBTEntry): void {
+  // boxen chrome: 1 border col + 3 padding cols per side (padding: 1 → 3 horizontal)
+  const width = getContentWidth(8, 68);
+  const field = (text: string) => colors.dim(wrapText(text, width, ''));
+
   const content = [
     `${colors.dim(formatDate(entry.createdAt))}`,
     '',
     `${colors.white(t().entries.activatingEvent)}`,
-    `${colors.dim(entry.activatingEvent)}`,
+    field(entry.activatingEvent),
     '',
     `${colors.white(t().entries.emotions)}  ${colors.dim(`${entry.emotionBefore}`)}  ${colors.dim(`(${entry.emotionIntensity}/100)`)}`,
     '',
     `${colors.white(t().entries.earlyWarningSigns)}`,
-    `${colors.dim(entry.earlyWarningSigns)}`,
+    field(entry.earlyWarningSigns),
     '',
     `${colors.white(t().entries.beliefs)}`,
-    `${colors.dim(entry.beliefs)}`,
+    field(entry.beliefs),
     '',
     `${colors.white(t().entries.consequences)}`,
-    `${colors.dim(entry.consequences)}`,
+    field(entry.consequences),
     '',
     `${colors.white(t().entries.disputation)}`,
-    `${colors.dim(entry.disputation)}`,
+    field(entry.disputation),
     '',
     `${colors.white(t().entries.newPhilosophy)}`,
-    `${colors.dim(entry.effectiveNewPhilosophy)}`,
+    field(entry.effectiveNewPhilosophy),
     '',
     `${colors.white(t().entries.motivation)}`,
-    `${colors.dim(entry.motivation)}`,
+    field(entry.motivation),
   ].join('\n');
 
   console.log();

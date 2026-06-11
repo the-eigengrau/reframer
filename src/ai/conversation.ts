@@ -5,7 +5,7 @@ import { buildSystemPrompt, buildEntryMessage } from './prompt.js';
 import { loadMemories, loadRecentSummaries, extractAndSaveMemories } from './memory.js';
 import { saveConversation, generateId } from '../storage/index.js';
 import { colors } from '../ui/theme.js';
-import { wrapText } from '../ui/text.js';
+import { createStreamWrapper, getContentWidth, wrapText } from '../ui/text.js';
 import { t } from '../i18n/index.js';
 
 const THINKING_FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
@@ -72,7 +72,7 @@ export async function runConversation(
         }
 
         // Write formatted "Me" message with word-wrap
-        const wrapped = wrapText(line, MAX_LINE_WIDTH, '  ');
+        const wrapped = wrapText(line, getContentWidth(2, MAX_LINE_WIDTH), '  ');
         process.stdout.write(`  ${colors.dimWhite(t().conversation.me)}\n${wrapped}\n`);
         rl.removeListener('line', onLine);
         rl.removeListener('close', onClose);
@@ -134,9 +134,13 @@ async function streamResponse(
 ): Promise<void> {
   const thinking = startThinking();
   let firstToken = true;
-  let buffer = '';
-  let col = 0;
   const indent = '  ';
+  const wrapper = createStreamWrapper({
+    width: getContentWidth(indent.length, MAX_LINE_WIDTH),
+    indent,
+    write: (s) => process.stdout.write(s),
+    colorize: colors.white,
+  });
 
   let fullResponse = '';
   try {
@@ -144,33 +148,20 @@ async function streamResponse(
       if (firstToken) {
         thinking.stop();
         process.stdout.write(`\n  ${colors.primary(t().conversation.rationalizer)}\n  `);
-        col = 0;
         firstToken = false;
       }
 
-      // Word-wrap streaming output
-      for (const ch of text) {
-        if (ch === '\n') {
-          process.stdout.write(`\n${indent}`);
-          col = 0;
-        } else {
-          if (col >= MAX_LINE_WIDTH && ch === ' ') {
-            process.stdout.write(`\n${indent}`);
-            col = 0;
-          } else {
-            process.stdout.write(colors.white(ch));
-            col++;
-          }
-        }
-      }
+      wrapper.push(text);
     });
   } catch (error) {
+    wrapper.flush();
     thinking.stop();
     const msg = error instanceof Error ? error.message : 'Unknown error';
     console.log(colors.error(`  ${t().conversation.error(msg)}`));
     return;
   }
 
+  wrapper.flush();
   if (firstToken) thinking.stop();
   console.log();
   messages.push({ role: 'assistant', content: fullResponse });

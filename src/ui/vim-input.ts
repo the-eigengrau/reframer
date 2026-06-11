@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto';
 import readline from 'node:readline';
 import { colors } from './theme.js';
 import { showHelp } from './help.js';
+import { getContentWidth, wrapPlain } from './text.js';
 import { t } from '../i18n/index.js';
 
 interface VimInputOptions {
@@ -17,6 +18,25 @@ interface VimInputOptions {
 const PREFIX = '  › ';
 const INDENT = '    ';
 const PREFIX_WIDTH = 4;
+
+function formatSubmittedAnswer(answer: string): string {
+  const width = getContentWidth(PREFIX_WIDTH);
+  const isMultiline = answer.includes('\n');
+  const content = isMultiline ? answer.split('\n')[0] : answer;
+  const segments = wrapPlain(content, width);
+  const lines = segments.map(
+    (seg, i) => (i === 0 ? PREFIX : INDENT) + colors.white(seg),
+  );
+  if (isMultiline) {
+    const last = segments[segments.length - 1];
+    if (last.length + 4 <= width) {
+      lines[lines.length - 1] += colors.dim(' ...');
+    } else {
+      lines.push(INDENT + colors.dim('...'));
+    }
+  }
+  return lines.join('\n');
+}
 
 function rawInput(opts: VimInputOptions): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -30,11 +50,6 @@ function rawInput(opts: VimInputOptions): Promise<string> {
     readline.emitKeypressEvents(process.stdin);
     if (process.stdin.isTTY) process.stdin.setRawMode(true);
     process.stdin.resume();
-
-    function getLineCapacity(): number {
-      const cols = process.stdout.columns || 80;
-      return Math.max(cols - PREFIX_WIDTH - 1, 10);
-    }
 
     function wrapBuffer(text: string, cap: number): string[] {
       if (text.length === 0) return [''];
@@ -52,7 +67,7 @@ function rawInput(opts: VimInputOptions): Promise<string> {
       }
       process.stdout.write('\r\x1b[J');
 
-      const cap = getLineCapacity();
+      const cap = getContentWidth(PREFIX_WIDTH);
       const lines = wrapBuffer(buffer, cap);
 
       // Ensure cursor has a rendered line to land on
@@ -99,10 +114,7 @@ function rawInput(opts: VimInputOptions): Promise<string> {
       }
       process.stdout.write('\r\x1b[J');
 
-      const display = answer.includes('\n')
-        ? colors.white(answer.split('\n')[0]) + colors.dim(' ...')
-        : colors.white(answer);
-      process.stdout.write(PREFIX + display + '\n');
+      process.stdout.write(formatSubmittedAnswer(answer) + '\n');
     }
 
     function cleanup() {
@@ -202,10 +214,7 @@ export async function vimInput(opts: VimInputOptions): Promise<string> {
         const editorResult = openInEditor();
         if (editorResult.trim()) {
           const trimmed = editorResult.trim();
-          const display = trimmed.includes('\n')
-            ? colors.white(trimmed.split('\n')[0]) + colors.dim(' ...')
-            : colors.white(trimmed);
-          console.log(`${PREFIX}${display}`);
+          console.log(formatSubmittedAnswer(trimmed));
           return trimmed;
         }
         // Empty result, re-show prompt
