@@ -83,7 +83,7 @@ export const la: Translations = {
     motivation: 'Motivatio',
     conversation: 'Colloquium',
     you: 'Tu',
-    rationalizer: 'Rationalizer',
+    reframer: 'Reframer',
   },
 
   stats: {
@@ -199,7 +199,7 @@ export const la: Translations = {
   conversation: {
     doneHint: '/done ad finiendum',
     me: 'Ego',
-    rationalizer: 'Rationalizer',
+    reframer: 'Reframer',
     error: (msg) => `Error: ${msg}`,
   },
 

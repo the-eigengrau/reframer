@@ -1,11 +1,11 @@
 {
-  "name": "rationalizer",
+  "name": "reframer",
   "version": "1.0.0",
   "description": "An elegant CLI tool for Rational Emotive Behavior Therapy (REBT) journaling with AI feedback and gamification",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "rationalizer": "./dist/index.js"
+    "reframer": "./dist/index.js"
   },
   "files": [
     "dist",
@@ -25,11 +25,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/the-eigengrau/rationalizer.git"
+    "url": "git+https://github.com/the-eigengrau/reframer.git"
   },
-  "homepage": "https://github.com/the-eigengrau/rationalizer#readme",
+  "homepage": "https://github.com/the-eigengrau/reframer#readme",
   "bugs": {
-    "url": "https://github.com/the-eigengrau/rationalizer/issues"
+    "url": "https://github.com/the-eigengrau/reframer/issues"
   },
   "engines": {
     "node": ">=20.0.0"

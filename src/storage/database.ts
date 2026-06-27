@@ -6,7 +6,7 @@ import os from 'node:os';
 let db: Database.Database | null = null;
 
 export function getDataDir(): string {
-  const dir = path.join(os.homedir(), '.rationalizer');
+  const dir = path.join(os.homedir(), '.reframer');
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
   }

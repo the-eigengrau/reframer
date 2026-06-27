@@ -6,7 +6,7 @@ import { configSchema, type Config, defaultConfig } from './schema.js';
 let cachedConfig: Config | null = null;
 
 export function getConfigDir(): string {
-  const dir = path.join(os.homedir(), '.rationalizer');
+  const dir = path.join(os.homedir(), '.reframer');
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
   }

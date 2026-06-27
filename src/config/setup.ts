@@ -15,7 +15,7 @@ export async function runSetupWizard(): Promise<Config> {
   console.log();
 
   console.log(boxen(
-    `${colors.white('Welcome to Rationalizer')}\n\n` +
+    `${colors.white('Welcome to Reframer')}\n\n` +
     `${colors.dim('A tool for Rational Emotive Behavior Therapy (REBT) journaling.')}\n` +
     `${colors.dim('REBT helps you identify irrational beliefs that cause emotional')}\n` +
     `${colors.dim('disturbance and replace them with healthier alternatives.')}\n\n` +

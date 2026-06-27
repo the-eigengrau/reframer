@@ -66,7 +66,7 @@ async function setupEncryption(config: Config): Promise<void> {
 
   console.clear();
   console.log();
-  console.log(colors.primary('  Rationalizer'));
+  console.log(colors.primary('  Reframer'));
   console.log();
   console.log(colors.white(`  ${t().passphrase.enter}`));
 

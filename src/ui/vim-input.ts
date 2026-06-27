@@ -38,6 +38,42 @@ function formatSubmittedAnswer(answer: string): string {
   return lines.join('\n');
 }
 
+// Break text into display rows: split on hard newlines, then wrap each
+// paragraph at `cap` characters. Mirrors the cursor math in cursorRowCol.
+export function displayLines(text: string, cap: number): string[] {
+  const rows: string[] = [];
+  for (const para of text.split('\n')) {
+    if (para.length === 0) {
+      rows.push('');
+      continue;
+    }
+    for (let i = 0; i < para.length; i += cap) {
+      rows.push(para.slice(i, i + cap));
+    }
+  }
+  return rows;
+}
+
+// Map a cursor offset within the buffer to its display row/column, using the
+// same wrapping rules as displayLines so the rendered caret lands correctly.
+export function cursorRowCol(text: string, cursor: number, cap: number): { row: number; col: number } {
+  let row = 0;
+  let col = 0;
+  for (let i = 0; i < cursor; i++) {
+    if (text[i] === '\n') {
+      row++;
+      col = 0;
+    } else {
+      col++;
+      if (col === cap) {
+        row++;
+        col = 0;
+      }
+    }
+  }
+  return { row, col };
+}
+
 function rawInput(opts: VimInputOptions): Promise<string> {
   return new Promise((resolve, reject) => {
     let buffer = '';
@@ -45,20 +81,20 @@ function rawInput(opts: VimInputOptions): Promise<string> {
     let lastCursorRow = 0;
     let hasKeypress = false;
     let errorMsg = '';
+    // Bracketed-paste state: while `pasting`, newlines are inserted into the
+    // buffer instead of submitting. `pasteCarriage` collapses CRLF to one \n.
+    let pasting = false;
+    let pasteCarriage = false;
     const wasRaw = process.stdin.isRaw;
 
     readline.emitKeypressEvents(process.stdin);
-    if (process.stdin.isTTY) process.stdin.setRawMode(true);
-    process.stdin.resume();
-
-    function wrapBuffer(text: string, cap: number): string[] {
-      if (text.length === 0) return [''];
-      const lines: string[] = [];
-      for (let i = 0; i < text.length; i += cap) {
-        lines.push(text.slice(i, i + cap));
-      }
-      return lines;
+    if (process.stdin.isTTY) {
+      process.stdin.setRawMode(true);
+      // Enable bracketed paste so the terminal brackets pasted text and we can
+      // tell pasted newlines apart from a real Enter keypress.
+      process.stdout.write('\x1b[?2004h');
     }
+    process.stdin.resume();
 
     function render() {
       // Clear previous output
@@ -68,10 +104,10 @@ function rawInput(opts: VimInputOptions): Promise<string> {
       process.stdout.write('\r\x1b[J');
 
       const cap = getContentWidth(PREFIX_WIDTH);
-      const lines = wrapBuffer(buffer, cap);
+      const lines = displayLines(buffer, cap);
 
       // Ensure cursor has a rendered line to land on
-      const cursorRow = Math.floor(cursor / cap);
+      const { row: cursorRow, col: cursorColRaw } = cursorRowCol(buffer, cursor, cap);
       while (lines.length <= cursorRow) lines.push('');
 
       // Build output
@@ -94,7 +130,7 @@ function rawInput(opts: VimInputOptions): Promise<string> {
       }
 
       // Position cursor
-      const cursorCol = (cursor % cap) + PREFIX_WIDTH;
+      const cursorCol = cursorColRaw + PREFIX_WIDTH;
       const totalLines = errorMsg ? lines.length + 1 : lines.length;
       const lastLine = totalLines - 1;
 
@@ -120,12 +156,54 @@ function rawInput(opts: VimInputOptions): Promise<string> {
     function cleanup() {
       process.stdin.removeListener('keypress', onKeypress);
       process.stdout.removeListener('resize', render);
-      if (process.stdin.isTTY) process.stdin.setRawMode(wasRaw ?? false);
+      if (process.stdin.isTTY) {
+        process.stdout.write('\x1b[?2004l');
+        process.stdin.setRawMode(wasRaw ?? false);
+      }
     }
 
     function onKeypress(_ch: string | undefined, key: readline.Key | undefined) {
       hasKeypress = true;
       errorMsg = '';
+
+      // --- Bracketed paste handling ---
+      // The terminal wraps pasted content in paste-start/paste-end markers.
+      // While pasting we insert characters verbatim (newlines included) and
+      // defer rendering until the paste completes, so a multi-line paste never
+      // submits the prompt — the user submits explicitly with Enter afterwards.
+      if (key?.name === 'paste-start') {
+        pasting = true;
+        pasteCarriage = false;
+        return;
+      }
+      if (key?.name === 'paste-end') {
+        pasting = false;
+        pasteCarriage = false;
+        render();
+        return;
+      }
+      if (pasting) {
+        let ins = '';
+        if (key?.name === 'return') {
+          // CR inside a paste — start of a possible CRLF pair.
+          ins = '\n';
+          pasteCarriage = true;
+        } else if (key?.name === 'enter') {
+          // LF: skip it if it immediately follows a CR (collapse CRLF to one \n).
+          if (!pasteCarriage) ins = '\n';
+          pasteCarriage = false;
+        } else if (typeof _ch === 'string' && !key?.ctrl && !key?.meta) {
+          ins = _ch === '\t' ? ' ' : _ch;
+          pasteCarriage = false;
+        } else {
+          pasteCarriage = false;
+        }
+        if (ins) {
+          buffer = buffer.slice(0, cursor) + ins + buffer.slice(cursor);
+          cursor += ins.length;
+        }
+        return;
+      }
 
       if (key?.ctrl && key.name === 'c') {
         cleanup();
@@ -238,7 +316,7 @@ export async function vimInput(opts: VimInputOptions): Promise<string> {
 
 function openInEditor(): string {
   const editor = process.env.EDITOR || process.env.VISUAL || 'vim';
-  const tmpFile = join(tmpdir(), `rationalizer-${randomUUID()}.txt`);
+  const tmpFile = join(tmpdir(), `reframer-${randomUUID()}.txt`);
   writeFileSync(tmpFile, '', { encoding: 'utf-8', mode: 0o600 });
 
   spawnSync(editor, [tmpFile], { stdio: 'inherit' });

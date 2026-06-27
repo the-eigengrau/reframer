@@ -83,7 +83,7 @@ export interface Translations {
     motivation: string;
     conversation: string;
     you: string;
-    rationalizer: string;
+    reframer: string;
   };
 
   stats: {
@@ -123,7 +123,7 @@ export interface Translations {
   conversation: {
     doneHint: string;
     me: string;
-    rationalizer: string;
+    reframer: string;
     error: (msg: string) => string;
   };
 

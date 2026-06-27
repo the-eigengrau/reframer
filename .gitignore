@@ -20,4 +20,4 @@ dist/
 Thumbs.db
 
 # App data (never commit user data)
-.rationalizer/
+.reframer/

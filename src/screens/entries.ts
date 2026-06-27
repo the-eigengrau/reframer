@@ -47,7 +47,7 @@ export async function viewPastEntries(): Promise<void> {
       if (convo) {
         console.log(colors.white(`\n  ${t().entries.conversation}\n`));
         for (const msg of convo.messages) {
-          const label = msg.role === 'user' ? colors.white(t().entries.you) : colors.primary(t().entries.rationalizer);
+          const label = msg.role === 'user' ? colors.white(t().entries.you) : colors.primary(t().entries.reframer);
           console.log(`  ${label}`);
           console.log(colors.white(wrapText(msg.content, getContentWidth(2, 72), '  ')));
           console.log();

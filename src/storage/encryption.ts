@@ -55,14 +55,14 @@ export function decryptJSON<T>(payload: EncryptedPayload, key: Buffer): T {
 
 /** Create a sentinel value to verify passphrase on subsequent launches */
 export function createSentinel(key: Buffer): EncryptedPayload {
-  return encrypt('rationalizer-sentinel-v1', key);
+  return encrypt('reframer-sentinel-v1', key);
 }
 
 /** Verify a passphrase by attempting to decrypt the sentinel */
 export function verifySentinel(payload: EncryptedPayload, key: Buffer): boolean {
   try {
     const result = decrypt(payload, key);
-    return result === 'rationalizer-sentinel-v1';
+    return result === 'reframer-sentinel-v1';
   } catch {
     return false;
   }

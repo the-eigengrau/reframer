@@ -10,7 +10,7 @@ import os from 'node:os';
 import type { REBTEntry, Memory, Conversation } from '../src/questionnaire/types.js';
 
 // Use a temporary directory for test database
-const TEST_DIR = path.join(os.tmpdir(), `rationalizer-test-${Date.now()}`);
+const TEST_DIR = path.join(os.tmpdir(), `reframer-test-${Date.now()}`);
 
 // Override the database module to use test directory
 let testDb: Database.Database | null = null;

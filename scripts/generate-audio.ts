@@ -1,7 +1,7 @@
 /**
  * generate-audio.ts
  *
- * Programmatically generates all WAV files for Rationalizer's retro Game Boy
+ * Programmatically generates all WAV files for Reframer's retro Game Boy
  * audio system. Uses raw PCM synthesis — no external audio dependencies.
  *
  * Outputs 44100Hz 16-bit mono WAV files to assets/audio/.

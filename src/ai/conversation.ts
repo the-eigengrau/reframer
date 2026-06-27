@@ -147,7 +147,7 @@ async function streamResponse(
     fullResponse = await provider.chat(messages, systemPrompt, (text) => {
       if (firstToken) {
         thinking.stop();
-        process.stdout.write(`\n  ${colors.primary(t().conversation.rationalizer)}\n  `);
+        process.stdout.write(`\n  ${colors.primary(t().conversation.reframer)}\n  `);
         firstToken = false;
       }
 

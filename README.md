@@ -1,15 +1,15 @@
-# Rationalizer
+# Reframer
 
 **A Stoic AI journal that teaches you to think clearly when life hits hard.**
 
-Rationalizer is a CLI-based tool for helping you feel better powered by Rational Emotive Behavior Therapy (REBT), the oldest and most battle-tested form of cognitive behavioral therapy. It walks you through a structured framework for dismantling irrational beliefs, then drops you into a Socratic dialogue with an AI that remembers your patterns across sessions.
+Reframer is a CLI-based tool for helping you feel better powered by Rational Emotive Behavior Therapy (REBT), the oldest and most battle-tested form of cognitive behavioral therapy. It walks you through a structured framework for dismantling irrational beliefs, then drops you into a Socratic dialogue with an AI that remembers your patterns across sessions.
 
 Your data stays on your machine. Encrypted. No cloud required.
 
 You can choose to use a cloud AI provider if you'd like to use their more powerful models.
 
 ```
-npm install -g rationalizer
+npm install -g reframer
 ```
 ---
 
@@ -65,7 +65,7 @@ The startup jingle is an 8-bit arrangement of the [Seikilos Epitaph](https://en.
 
 ### Local-first, encrypted by default
 
-All data lives in `~/.rationalizer/data.db`. Journal entries, conversations, and AI memories are encrypted with **AES-256-GCM** (PBKDF2 key derivation, 100k iterations, SHA-512). Your passphrase never leaves your machine.
+All data lives in `~/.reframer/data.db`. Journal entries, conversations, and AI memories are encrypted with **AES-256-GCM** (PBKDF2 key derivation, 100k iterations, SHA-512). Your passphrase never leaves your machine.
 
 **No telemetry. No analytics. No tracking.**
 
@@ -86,14 +86,14 @@ Press `Ctrl+G` during any journal prompt to open your `$EDITOR`. Write long-form
 ## Install
 
 ```bash
-npm install -g rationalizer
+npm install -g reframer
 ```
 
 From source:
 
 ```bash
-git clone https://github.com/the-eigengrau/rationalizer.git
-cd rationalizer
+git clone https://github.com/the-eigengrau/reframer.git
+cd reframer
 npm install
 npm run dev
 ```
@@ -101,7 +101,7 @@ npm run dev
 ## Usage
 
 ```bash
-rationalizer
+reframer
 ```
 
 First run → setup wizard (AI provider, encryption passphrase). Every run after that → straight to journaling.

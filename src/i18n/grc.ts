@@ -83,7 +83,7 @@ export const grc: Translations = {
     motivation: 'Κίνητρον',
     conversation: 'Διάλογος',
     you: 'Σύ',
-    rationalizer: 'Rationalizer',
+    reframer: 'Reframer',
   },
 
   stats: {
@@ -199,7 +199,7 @@ export const grc: Translations = {
   conversation: {
     doneHint: '/done πρὸς τὸ τέλος',
     me: 'Ἐγώ',
-    rationalizer: 'Rationalizer',
+    reframer: 'Reframer',
     error: (msg) => `Σφάλμα: ${msg}`,
   },
 
